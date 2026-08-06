@@ -1,0 +1,14 @@
+node_modules/
+database.sqlite
+database.sqlite-shm
+database.sqlite-wal
+uploads/images/*
+uploads/videos/*
+uploads/files/*
+!uploads/images/.gitkeep
+!uploads/videos/.gitkeep
+!uploads/files/.gitkeep
+.env
+.workbuddy/
+keys/
+*.log
