@@ -26,22 +26,25 @@
     <!-- 顶部栏 -->
     <header id="header">
       <div class="header-left">
+        <button id="btn-menu" class="btn-menu" title="菜单">☰</button>
         <span class="logo">💬 匿名聊天室</span>
         <span id="room-info" class="room-badge">公共频道</span>
       </div>
       <div class="header-center">
         <span id="online-count" class="online-badge">在线: 0</span>
       </div>
-      <div class="header-right">
-        <button id="btn-export" class="btn-sm" title="导出聊天记录">📤 导出</button>
-        <button id="btn-import" class="btn-sm" title="导入聊天记录">📥 导入</button>
-        <button id="btn-load-all" class="btn-sm" title="加载全部历史记录">📜 历史</button>
+      <div class="header-right" id="header-actions">
+        <button id="btn-export" class="btn-sm" title="导出聊天记录">📤 <span class="btn-label">导出</span></button>
+        <button id="btn-import" class="btn-sm" title="导入聊天记录">📥 <span class="btn-label">导入</span></button>
+        <button id="btn-load-all" class="btn-sm" title="加载全部历史记录">📜 <span class="btn-label">历史</span></button>
         <span id="my-nickname" class="self-badge"></span>
       </div>
     </header>
 
     <!-- 主体区 -->
     <div id="main-container">
+      <!-- 手机端侧栏遮罩 -->
+      <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
       <!-- 左侧：对话列表 -->
       <aside id="sidebar">
         <div id="sidebar-tabs">

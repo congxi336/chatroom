@@ -29,6 +29,27 @@ const chatSubtitle = $('#chat-subtitle');
 const myNicknameEl = $('#my-nickname');
 const fileInput = $('#file-input');
 const uploadStatus = $('#upload-status');
+const btnMenu = $('#btn-menu');
+const sidebar = $('#sidebar');
+const sidebarBackdrop = $('#sidebar-backdrop');
+
+// ============ Mobile Sidebar Toggle ============
+btnMenu.addEventListener('click', () => {
+  sidebar.classList.add('open');
+  sidebarBackdrop.classList.add('show');
+});
+
+sidebarBackdrop.addEventListener('click', () => {
+  sidebar.classList.remove('open');
+  sidebarBackdrop.classList.remove('show');
+});
+
+function closeSidebarOnMobile() {
+  if (window.innerWidth <= 768) {
+    sidebar.classList.remove('open');
+    sidebarBackdrop.classList.remove('show');
+  }
+}
 
 // ============ Nickname Join ============
 nicknameInput.addEventListener('input', () => {
@@ -318,6 +339,7 @@ function updateOnlineUsers(users) {
 function startPrivateChat(targetUser) {
   openPrivateChat(targetUser);
   switchChat(targetUser);
+  closeSidebarOnMobile();
 }
 
 function openPrivateChat(targetUser) {
@@ -344,6 +366,7 @@ function openPrivateChat(targetUser) {
 
 function switchChat(target) {
   currentChat = target;
+  closeSidebarOnMobile();
 
   // Update sidebar active
   $$('.chat-item').forEach(el => el.classList.remove('active'));
