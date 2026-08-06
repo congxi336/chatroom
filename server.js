@@ -9,7 +9,7 @@ const Database = require('better-sqlite3');
 const { v4: uuidv4 } = require('uuid');
 
 // ============ Configuration ============
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const ADMIN_NICK = 'super_user';
 const ADMIN_PASS = 'son_moon_21';
 const KEY_FILE = path.join(__dirname, 'keys', 'import-key.json');
@@ -25,6 +25,12 @@ const io = new Server(server, {
 app.use(express.json({ limit: '500mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Ensure required directories exist
+['uploads/images', 'uploads/videos', 'uploads/files'].forEach(dir => {
+  const fullPath = path.join(__dirname, dir);
+  if (!fs.existsSync(fullPath)) fs.mkdirSync(fullPath, { recursive: true });
+});
 
 // ============ Database Setup ============
 const db = new Database(DB_FILE);
@@ -54,6 +60,12 @@ db.exec(`
 
 // ============ Import Key Management ============
 function getOrCreateImportKey() {
+  // Ensure keys directory exists
+  const keyDir = path.dirname(KEY_FILE);
+  if (!fs.existsSync(keyDir)) {
+    fs.mkdirSync(keyDir, { recursive: true });
+  }
+
   if (fs.existsSync(KEY_FILE)) {
     return JSON.parse(fs.readFileSync(KEY_FILE, 'utf-8'));
   }
