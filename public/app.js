@@ -29,6 +29,8 @@ const chatSubtitle = $('#chat-subtitle');
 const myNicknameEl = $('#my-nickname');
 const fileInput = $('#file-input');
 const uploadStatus = $('#upload-status');
+const uploadProgressBar = $('#upload-progress-bar');
+const uploadProgressWrap = $('#upload-progress');
 const btnMenu = $('#btn-menu');
 const sidebar = $('#sidebar');
 const sidebarBackdrop = $('#sidebar-backdrop');
@@ -286,26 +288,59 @@ function triggerFileUpload() {
   fileInput.click();
 }
 
-fileInput.addEventListener('change', async () => {
+fileInput.addEventListener('change', () => {
   const file = fileInput.files[0];
   if (!file) return;
 
+  const progressBar = $('#upload-progress-bar');
+  const progressWrap = $('#upload-progress');
+  progressBar.style.width = '0%';
+  progressWrap.style.display = 'block';
   uploadStatus.textContent = `上传中: ${file.name}...`;
+
   const formData = new FormData();
   formData.append('file', file);
 
-  try {
-    const res = await fetch('/api/upload', { method: 'POST', body: formData });
-    const data = await res.json();
-    if (data.error) {
-      uploadStatus.textContent = '上传失败: ' + data.error;
-      return;
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', '/api/upload');
+
+  xhr.upload.addEventListener('progress', (e) => {
+    if (e.lengthComputable) {
+      const pct = Math.round((e.loaded / e.total) * 100);
+      progressBar.style.width = pct + '%';
     }
-    uploadedFile = data;
-    uploadStatus.textContent = `已选择: ${data.file_name} (${formatSize(data.file_size)})`;
-  } catch (err) {
-    uploadStatus.textContent = '上传失败: ' + err.message;
-  }
+  });
+
+  xhr.addEventListener('load', () => {
+    progressWrap.style.display = 'none';
+    if (xhr.status === 200) {
+      try {
+        const data = JSON.parse(xhr.responseText);
+        if (data.error) {
+          uploadStatus.textContent = '上传失败: ' + data.error;
+          return;
+        }
+        uploadedFile = data;
+        uploadStatus.textContent = `已选择: ${data.file_name} (${formatSize(data.file_size)})`;
+      } catch {
+        uploadStatus.textContent = '上传失败: 响应解析错误';
+      }
+    } else {
+      uploadStatus.textContent = '上传失败: HTTP ' + xhr.status;
+    }
+  });
+
+  xhr.addEventListener('error', () => {
+    progressWrap.style.display = 'none';
+    uploadStatus.textContent = '上传失败: 网络错误';
+  });
+
+  xhr.addEventListener('abort', () => {
+    progressWrap.style.display = 'none';
+    uploadStatus.textContent = '';
+  });
+
+  xhr.send(formData);
   fileInput.value = '';
 });
 
