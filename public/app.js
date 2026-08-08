@@ -180,7 +180,9 @@ function addMessage(msg, side, chatKey) {
   } else if (msg.message_type === 'video') {
     content = `<div class="msg-bubble">${senderName}<video src="${escapeHtml(msg.content)}" class="msg-video" controls preload="metadata"></video><div class="msg-time">${formatTime(msg.created_at)}</div></div>`;
   } else if (msg.message_type === 'file') {
-    content = `<div class="msg-bubble">${senderName}<a href="${escapeHtml(msg.content)}" class="msg-file" target="_blank" download="${escapeHtml(msg.file_name || 'file')}"><span class="msg-file-icon">📄</span><div class="msg-file-info"><div class="msg-file-name">${escapeHtml(msg.file_name || '文件')}</div><div class="msg-file-size">${formatSize(msg.file_size)}</div></div></a><div class="msg-time">${formatTime(msg.created_at)}</div></div>`;
+    const dlName = (msg.file_name || 'file').replace(/"/g, '');
+    const dlUrl = `/api/download?path=${encodeURIComponent(msg.content)}&name=${encodeURIComponent(dlName)}`;
+    content = `<div class="msg-bubble">${senderName}<a href="${dlUrl}" class="msg-file"><span class="msg-file-icon">📄</span><div class="msg-file-info"><div class="msg-file-name">${escapeHtml(msg.file_name || '文件')}</div><div class="msg-file-size">${formatSize(msg.file_size)}</div></div></a><div class="msg-time">${formatTime(msg.created_at)}</div></div>`;
   }
 
   div.innerHTML = content;
