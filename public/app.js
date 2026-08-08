@@ -56,10 +56,11 @@ function closeSidebarOnMobile() {
 // ============ Nickname Join ============
 nicknameInput.addEventListener('input', () => {
   const val = nicknameInput.value.trim();
+  const pwdGroup = document.getElementById('admin-pwd-group');
   if (val === 'super_user') {
-    adminPassword.style.display = 'block';
+    pwdGroup.style.display = 'block';
   } else {
-    adminPassword.style.display = 'none';
+    pwdGroup.style.display = 'none';
     adminPassword.value = '';
   }
 });
@@ -99,6 +100,7 @@ function connectSocket(nickname, password) {
       isAdmin = response.isAdmin;
       nicknameOverlay.classList.remove('active');
       app.style.display = 'flex';
+      requestAnimationFrame(() => app.classList.add('ready'));
       myNicknameEl.textContent = isAdmin ? '🔧 管理员模式' : `👤 ${nickname}`;
 
       if (isAdmin) {
@@ -200,7 +202,10 @@ function addSystemMessage(msg) {
 }
 
 function removeLoading() {
-  if (messagesLoading) messagesLoading.style.display = 'none';
+  if (messagesLoading) {
+    messagesLoading.style.opacity = '0';
+    setTimeout(() => { if (messagesLoading) messagesLoading.remove(); }, 300);
+  }
 }
 
 function scrollToBottom() {
@@ -395,6 +400,11 @@ function openPrivateChat(targetUser) {
     <span class="chat-item-close" onclick="event.stopPropagation(); closePrivateChat('${escapeHtml(targetUser)}')">&times;</span>
   `;
   div.addEventListener('click', () => switchChat(targetUser));
+  div.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); switchChat(targetUser); }
+  });
+  div.setAttribute('role', 'button');
+  div.setAttribute('tabindex', '0');
   privateChatsList.appendChild(div);
 
   // Load private history
@@ -441,6 +451,9 @@ function closePrivateChat(target) {
 
 // ============ Chat Switcher (Sidebar) ============
 $('.chat-item[data-chat="public"]').addEventListener('click', () => switchChat('public'));
+$('.chat-item[data-chat="public"]').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); switchChat('public'); }
+});
 
 // Sidebar Tabs
 $$('.sidebar-tab').forEach(tab => {

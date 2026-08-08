@@ -5,57 +5,69 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>匿名聊天室</title>
   <link rel="stylesheet" href="/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
-  <!-- ========== 昵称输入遮罩 ========== -->
-  <div id="nickname-overlay" class="overlay active">
+  <!-- ===== Nickname Overlay ===== -->
+  <div id="nickname-overlay" class="overlay active" role="dialog" aria-modal="true" aria-label="昵称输入">
     <div class="nickname-box">
-      <div class="nickname-icon">💬</div>
+      <div class="nickname-icon" aria-hidden="true">💬</div>
       <h2>欢迎来到匿名聊天室</h2>
-      <p>请输入昵称以加入聊天</p>
-      <input type="text" id="nickname-input" placeholder="输入你的昵称..." maxlength="20" autocomplete="off">
-      <input type="password" id="admin-password" placeholder="管理员密码（如非管理员请留空）" maxlength="50" autocomplete="off" style="display:none;">
-      <div id="nickname-error" class="error-msg"></div>
+      <p>输入昵称即可加入</p>
+      <div class="input-group">
+        <label for="nickname-input">昵称</label>
+        <input type="text" id="nickname-input" placeholder="你的昵称…" maxlength="20" autocomplete="off" required aria-required="true">
+      </div>
+      <div class="input-group" id="admin-pwd-group" style="display:none;">
+        <label for="admin-password">管理员密码</label>
+        <input type="password" id="admin-password" placeholder="输入密码" maxlength="50" autocomplete="off">
+      </div>
+      <div id="nickname-error" class="error-msg" role="alert"></div>
       <button id="join-btn" class="btn-primary">进入聊天室</button>
     </div>
   </div>
 
-  <!-- ========== 主界面 ========== -->
+  <!-- ===== Main App ===== -->
   <div id="app" style="display:none;">
-    <!-- 顶部栏 -->
-    <header id="header">
+    <!-- Header -->
+    <header id="header" role="banner">
       <div class="header-left">
-        <button id="btn-menu" class="btn-menu" title="菜单">☰</button>
-        <span class="logo">💬 匿名聊天室</span>
+        <button id="btn-menu" class="btn-menu" title="菜单" aria-label="打开菜单">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <span class="logo">匿名聊天室</span>
         <span id="room-info" class="room-badge">公共频道</span>
       </div>
       <div class="header-center">
-        <span id="online-count" class="online-badge">在线: 0</span>
+        <span id="online-count" class="online-badge">
+          <span class="online-dot" aria-hidden="true"></span>
+          <span>在线: 0</span>
+        </span>
       </div>
       <div class="header-right" id="header-actions">
-        <button id="btn-export" class="btn-sm" title="导出聊天记录">📤 <span class="btn-label">导出</span></button>
-        <button id="btn-import" class="btn-sm" title="导入聊天记录">📥 <span class="btn-label">导入</span></button>
-        <button id="btn-load-all" class="btn-sm" title="加载全部历史记录">📜 <span class="btn-label">历史</span></button>
+        <button id="btn-export" class="btn-sm" title="导出聊天记录"><span aria-hidden="true">↑</span><span class="btn-label">导出</span></button>
+        <button id="btn-import" class="btn-sm" title="导入聊天记录"><span aria-hidden="true">↓</span><span class="btn-label">导入</span></button>
+        <button id="btn-load-all" class="btn-sm" title="全部历史记录"><span aria-hidden="true">☰</span><span class="btn-label">历史</span></button>
         <span id="my-nickname" class="self-badge"></span>
       </div>
     </header>
 
-    <!-- 主体区 -->
+    <!-- Main -->
     <div id="main-container">
-      <!-- 手机端侧栏遮罩 -->
-      <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
-      <!-- 左侧：对话列表 -->
-      <aside id="sidebar">
-        <div id="sidebar-tabs">
-          <div class="sidebar-tab active" data-tab="chats">对话</div>
-          <div class="sidebar-tab" data-tab="users">在线</div>
-        </div>
+      <div id="sidebar-backdrop" class="sidebar-backdrop" aria-hidden="true"></div>
 
-        <!-- 对话列表 -->
-        <div id="chats-panel" class="sidebar-panel active">
-          <div class="chat-item active" data-chat="public" data-user="public">
-            <div class="chat-item-avatar">🌐</div>
+      <!-- Sidebar -->
+      <aside id="sidebar" role="navigation" aria-label="对话与用户">
+        <div id="sidebar-tabs" role="tablist">
+          <button class="sidebar-tab active" role="tab" aria-selected="true" data-tab="chats">对话</button>
+          <button class="sidebar-tab" role="tab" aria-selected="false" data-tab="users">在线</button>
+        </div>
+        <div id="chats-panel" class="sidebar-panel active" role="tabpanel">
+          <div class="chat-item active" data-chat="public" data-user="public" role="button" tabindex="0">
+            <div class="chat-item-avatar" aria-hidden="true">#</div>
             <div class="chat-item-info">
               <div class="chat-item-name">公共聊天室</div>
               <div class="chat-item-preview">所有人的消息</div>
@@ -63,146 +75,132 @@
           </div>
           <div id="private-chats-list"></div>
         </div>
-
-        <!-- 在线用户 -->
-        <div id="users-panel" class="sidebar-panel">
+        <div id="users-panel" class="sidebar-panel" role="tabpanel">
           <div class="users-header">在线用户</div>
           <div id="online-users-list"></div>
         </div>
       </aside>
 
-      <!-- 右侧：聊天区 -->
-      <main id="chat-area">
-        <!-- 聊天头部 -->
+      <!-- Chat area -->
+      <main id="chat-area" role="main" aria-label="聊天区域">
         <div id="chat-header">
-          <div id="chat-title">🌐 公共聊天室</div>
+          <div id="chat-title"># 公共聊天室</div>
           <div id="chat-subtitle"></div>
         </div>
 
-        <!-- 消息列表 -->
-        <div id="messages-container">
+        <div id="messages-container" aria-live="polite" aria-label="消息列表">
           <div id="messages-loading" class="loading-indicator">
-            <div class="spinner"></div>
-            <span>加载聊天记录中...</span>
+            <div class="skeleton-line" style="width:60%"></div>
           </div>
         </div>
 
-        <!-- 输入区 -->
+        <!-- Input -->
         <div id="input-area">
+          <div id="upload-progress" class="upload-progress" style="display:none;" aria-hidden="true">
+            <div id="upload-progress-bar" class="upload-progress-bar"></div>
+          </div>
           <div id="input-toolbar">
-            <button class="toolbar-btn" id="btn-image" title="发送图片">🖼️ 图片</button>
-            <button class="toolbar-btn" id="btn-video" title="发送视频">🎬 视频</button>
-            <button class="toolbar-btn" id="btn-file" title="发送文件">📎 文件</button>
-            <button class="toolbar-btn" id="btn-emoji" title="表情">😊</button>
-            <span id="upload-status" class="upload-status"></span>
-            <div id="upload-progress" class="upload-progress" style="display:none;">
-              <div id="upload-progress-bar" class="upload-progress-bar"></div>
-            </div>
+            <button class="toolbar-btn" id="btn-image" title="发送图片"><span class="tb-icon" aria-hidden="true">🖼</span><span class="tb-label">图片</span></button>
+            <button class="toolbar-btn" id="btn-video" title="发送视频"><span class="tb-icon" aria-hidden="true">🎬</span><span class="tb-label">视频</span></button>
+            <button class="toolbar-btn" id="btn-file" title="发送文件"><span class="tb-icon" aria-hidden="true">📎</span><span class="tb-label">文件</span></button>
+            <span id="upload-status" class="upload-status" aria-live="polite"></span>
             <input type="file" id="file-input" style="display:none;" accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.rar,.7z">
           </div>
           <div id="input-row">
-            <textarea id="message-input" placeholder="输入消息... (Enter 发送, Shift+Enter 换行)" rows="1"></textarea>
-            <button id="btn-send" class="btn-send">发送</button>
+            <textarea id="message-input" placeholder="输入消息… (Enter 发送)" rows="1" aria-label="消息输入"></textarea>
+            <button id="btn-send" class="btn-send" title="发送消息" aria-label="发送">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+            </button>
           </div>
         </div>
       </main>
     </div>
   </div>
 
-  <!-- ========== 导出弹窗 ========== -->
-  <div id="export-modal" class="modal">
+  <!-- ===== Modals ===== -->
+  <!-- Export -->
+  <div id="export-modal" class="modal" role="dialog" aria-modal="true" aria-label="导出聊天记录">
     <div class="modal-content">
       <div class="modal-header">
         <h3>导出聊天记录</h3>
-        <button class="modal-close" data-modal="export-modal">&times;</button>
+        <button class="modal-close" data-modal="export-modal" aria-label="关闭">&times;</button>
       </div>
       <div class="modal-body">
-        <div class="form-group">
-          <label>
-            <input type="radio" name="export-range" value="all" checked> 导出全部记录
-          </label>
+        <div class="form-group radio-row">
+          <label><input type="radio" name="export-range" value="all" checked> 导出全部记录</label>
+          <label><input type="radio" name="export-range" value="range"> 指定时间段</label>
         </div>
-        <div class="form-group">
-          <label>
-            <input type="radio" name="export-range" value="range"> 指定时间段
-          </label>
+        <div id="export-date-range" style="display:none;margin-top:var(--space-3);">
+          <input type="datetime-local" id="export-start" aria-label="开始时间"> —
+          <input type="datetime-local" id="export-end" aria-label="结束时间">
         </div>
-        <div id="export-date-range" style="display:none; margin-top: 8px;">
-          <input type="datetime-local" id="export-start"> 至
-          <input type="datetime-local" id="export-end">
-        </div>
-        <button id="btn-do-export" class="btn-primary" style="margin-top:12px;width:100%;">确认导出</button>
+        <button id="btn-do-export" class="btn-primary" style="margin-top:var(--space-4)">确认导出</button>
       </div>
     </div>
   </div>
 
-  <!-- ========== 导入弹窗 ========== -->
-  <div id="import-modal" class="modal">
+  <!-- Import -->
+  <div id="import-modal" class="modal" role="dialog" aria-modal="true" aria-label="导入聊天记录">
     <div class="modal-content">
       <div class="modal-header">
         <h3>导入聊天记录</h3>
-        <button class="modal-close" data-modal="import-modal">&times;</button>
+        <button class="modal-close" data-modal="import-modal" aria-label="关闭">&times;</button>
       </div>
       <div class="modal-body">
         <div class="form-group">
-          <label>数据文件 (JSON格式)：</label>
+          <label for="import-data-file">数据文件 (JSON)</label>
           <input type="file" id="import-data-file" accept=".json">
         </div>
         <div class="form-group">
-          <label>密钥文件 (可选，如已内置签名可省略)：</label>
+          <label for="import-key-file">密钥文件 (可选)</label>
           <input type="file" id="import-key-file" accept=".json">
         </div>
-        <div id="import-status" class="error-msg"></div>
-        <button id="btn-do-import" class="btn-primary" style="margin-top:12px;width:100%;">确认导入</button>
+        <div id="import-status" class="error-msg" role="alert"></div>
+        <button id="btn-do-import" class="btn-primary" style="margin-top:var(--space-4)">确认导入</button>
       </div>
     </div>
   </div>
 
-  <!-- ========== 历史记录弹窗 ========== -->
-  <div id="history-modal" class="modal">
+  <!-- History -->
+  <div id="history-modal" class="modal" role="dialog" aria-modal="true" aria-label="全部聊天记录">
     <div class="modal-content modal-lg">
       <div class="modal-header">
         <h3>全部聊天记录</h3>
-        <button class="modal-close" data-modal="history-modal">&times;</button>
+        <button class="modal-close" data-modal="history-modal" aria-label="关闭">&times;</button>
       </div>
       <div class="modal-body">
-        <div id="history-content">
-          <div class="loading-indicator">
-            <div class="spinner"></div>
-            <span>加载中...</span>
-          </div>
-        </div>
-        <div id="history-pagination" style="text-align:center;margin-top:12px;"></div>
+        <div id="history-content"><div class="loading-indicator"><div class="skeleton-line" style="width:80%"></div></div></div>
+        <div id="history-pagination" style="text-align:center;margin-top:var(--space-4);"></div>
       </div>
     </div>
   </div>
 
-  <!-- ========== 管理员面板 ========== -->
-  <div id="admin-panel" class="modal">
+  <!-- Admin -->
+  <div id="admin-panel" class="modal" role="dialog" aria-modal="true" aria-label="管理员面板">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>🔧 管理员面板</h3>
-        <button class="modal-close" data-modal="admin-panel">&times;</button>
+        <h3>管理员面板</h3>
+        <button class="modal-close" data-modal="admin-panel" aria-label="关闭">&times;</button>
       </div>
       <div class="modal-body">
         <h4>移除在线用户</h4>
-        <div id="admin-user-list"></div>
-        <hr>
+        <div id="admin-user-list" style="min-height:20px;color:var(--c-text-muted)">暂无在线用户</div>
+        <hr style="border:none;border-top:1px solid var(--c-border-light);margin:var(--space-4) 0;">
         <h4>清空历史记录</h4>
         <div class="clear-options">
-          <button class="btn-danger" data-clear="1y">清空一年以前的记录</button>
-          <button class="btn-danger" data-clear="1m">清空一个月以前的记录</button>
-          <button class="btn-danger" data-clear="1w">清空一周以前的记录</button>
+          <button class="btn-danger" data-clear="1y">一年前</button>
+          <button class="btn-danger" data-clear="1m">一月前</button>
+          <button class="btn-danger" data-clear="1w">一周前</button>
         </div>
         <div id="clear-status"></div>
       </div>
     </div>
   </div>
 
-  <!-- ========== 图片预览弹窗 ========== -->
-  <div id="image-preview-modal" class="modal image-preview-modal">
-    <span class="image-preview-close">&times;</span>
-    <img id="image-preview-img" src="" alt="预览">
+  <!-- Image Preview -->
+  <div id="image-preview-modal" class="modal image-preview-modal" role="dialog" aria-modal="true" aria-label="图片预览">
+    <button class="image-preview-close" aria-label="关闭">&times;</button>
+    <img id="image-preview-img" src="" alt="图片预览">
   </div>
 
   <script src="/app.js"></script>
