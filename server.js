@@ -518,7 +518,7 @@ server.listen(PORT, () => {
 const SSL_DIR = '/etc/nginx/ssl';
 const SSL_KEY = path.join(SSL_DIR, 'privkey.pem');
 const SSL_CERT = path.join(SSL_DIR, 'fullchain.pem');
-if (fs.existsSync(SSL_KEY) && fs.existsSync(SSL_CERT)) {
+if (!process.env.DISABLE_HTTPS && fs.existsSync(SSL_KEY) && fs.existsSync(SSL_CERT)) {
   const httpsServer = https.createServer({
     key: fs.readFileSync(SSL_KEY),
     cert: fs.readFileSync(SSL_CERT),
