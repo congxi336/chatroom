@@ -1,3 +1,4 @@
+const https = require('https');
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -507,7 +508,26 @@ function getUserList() {
 server.listen(PORT, () => {
   console.log(`\n========================================`);
   console.log(`  匿名聊天室已启动`);
-  console.log(`  http://localhost:${PORT}`);
-  console.log(`  导入密钥文件: ${KEY_FILE}`);
+  console.log(`  HTTP  http://localhost:${PORT}`);
+  console.log(`  密钥  ${KEY_FILE}`);
   console.log(`========================================\n`);
 });
+
+// HTTPS (optional — only if cert files exist)
+const SSL_DIR = '/etc/nginx/ssl';
+const SSL_KEY = path.join(SSL_DIR, 'privkey.pem');
+const SSL_CERT = path.join(SSL_DIR, 'fullchain.pem');
+if (fs.existsSync(SSL_KEY) && fs.existsSync(SSL_CERT)) {
+  const httpsServer = https.createServer({
+    key: fs.readFileSync(SSL_KEY),
+    cert: fs.readFileSync(SSL_CERT),
+  }, app);
+  const httpsIo = new Server(httpsServer, { maxHttpBufferSize: 500 * 1024 * 1024 });
+  httpsIo.on('connection', (socket) => {
+    // Re-dispatch to the same connection handler by re-emitting on io
+    io.emit('connection', socket);
+  });
+  httpsServer.listen(443, () => console.log('  HTTPS https://0.0.0.0:443'));
+} else {
+  console.log('  HTTPS 跳过（证书文件不存在）');
+}

@@ -8,6 +8,7 @@ uploads/files/*
 !uploads/images/.gitkeep
 !uploads/videos/.gitkeep
 !uploads/files/.gitkeep
+logs/
 .env
 .workbuddy/
 keys/
