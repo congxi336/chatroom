@@ -492,7 +492,7 @@ function handleConnection(socket) {
     io.emit('online_users', getUserList());
     console.log(`[断开] ${user?.nickname || '未知'} (${socket.id})`);
   });
-});
+}
 io.on('connection', handleConnection);
 
 function getUserList() {
