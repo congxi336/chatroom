@@ -307,7 +307,7 @@ app.post('/api/import', upload.fields([
 const onlineUsers = new Map(); // socketId -> { nickname, isAdmin }
 
 // ============ Socket.io ============
-io.on('connection', (socket) => {
+function handleConnection(socket) {
   console.log(`[连接] 新连接: ${socket.id}`);
 
   // ===== Join =====
@@ -493,6 +493,7 @@ io.on('connection', (socket) => {
     console.log(`[断开] ${user?.nickname || '未知'} (${socket.id})`);
   });
 });
+io.on('connection', handleConnection);
 
 function getUserList() {
   const list = [];
@@ -523,10 +524,7 @@ if (fs.existsSync(SSL_KEY) && fs.existsSync(SSL_CERT)) {
     cert: fs.readFileSync(SSL_CERT),
   }, app);
   const httpsIo = new Server(httpsServer, { maxHttpBufferSize: 500 * 1024 * 1024 });
-  httpsIo.on('connection', (socket) => {
-    // Re-dispatch to the same connection handler by re-emitting on io
-    io.emit('connection', socket);
-  });
+  httpsIo.on('connection', handleConnection);
   httpsServer.listen(443, () => console.log('  HTTPS https://0.0.0.0:443'));
 } else {
   console.log('  HTTPS 跳过（证书文件不存在）');
